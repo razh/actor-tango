@@ -192,8 +192,8 @@
     this.backgroundCanvas.height = this.canvas.height;
 
     drawBackground( this.backgroundCtx, 32, 32, {
-      hue: 30,
-      saturation: 10,
+      hue: 120,
+      saturation: 20,
       lightness: 40,
       hueSpread: 10,
       saturationSpread: 5,
