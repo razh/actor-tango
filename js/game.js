@@ -4,6 +4,10 @@
   var pixelSize = 16;
   var halfPixelSize = 0.5 * pixelSize;
 
+  function randomIntSpread( value, spread ) {
+    return Math.round( value + ( Math.random() < 0.5 ? spread : -spread ) );
+  }
+
   function drawPixel( ctx, x, y, size, color ) {
     size = size || pixelSize;
     var halfSize = 0.5 * size;
@@ -12,7 +16,7 @@
 
     ctx.beginPath();
     ctx.translate( x, y );
-    ctx.rect( x - halfSize, y - halfSize, size, size );
+    ctx.rect( 0, 0, size, size );
     ctx.fillStyle = color || '#fff';
     ctx.fill();
 
@@ -50,35 +54,56 @@
           index += 10;
         }
 
-        drawPixel( ctx, pixelSize * index, 2 * pixelSize, 2 * pixelSize, '#f00' );
+        drawPixel( ctx, 3 * pixelSize * index, 2 * pixelSize, 2 * pixelSize, '#f00' );
       }
 
       var topIndex = topRow.indexOf( index );
       if ( topIndex !== -1 ) {
-        drawPixel( ctx, pixelSize * topIndex + halfPixelSize, 3 * pixelSize, 2 * pixelSize, '#0f0' );
+        drawPixel( ctx, 3 * pixelSize * topIndex + pixelSize, 6 * pixelSize, 2 * pixelSize, '#0f0' );
       }
 
       var midIndex = midRow.indexOf( index );
       if ( midIndex !== -1 ) {
-        drawPixel( ctx, pixelSize * midIndex + 2 * halfPixelSize, 4 * pixelSize, 2 * pixelSize, '#00f' );
+        drawPixel( ctx, 3 * pixelSize * midIndex + 2 * pixelSize, 10 * pixelSize, 2 * pixelSize, '#00f' );
       }
 
       var bottomIndex = bottomRow.indexOf( index );
       if ( bottomIndex !== -1 ) {
-        drawPixel( ctx, pixelSize * bottomIndex + 3 * halfPixelSize, 5 * pixelSize, 2 * pixelSize, '#f0f' );
+        drawPixel( ctx, 3 * pixelSize * bottomIndex + 3 * pixelSize, 14 * pixelSize, 2 * pixelSize, '#f0f' );
       }
 
       ctx.globalAlpha = 1;
     });
   }
 
-  function Background( width, height, options ) {
+  function drawBackground( ctx, width, height, options ) {
+    var hue = options.hue || 0;
+    var saturation = options.saturation || 0;
+    var lightness = options.lightness || 0;
 
+    var hueSpread = options.hueSpread || 10;
+    var saturationSpread = options.saturationSpread || 10;
+    var lightnessSpread = options.lightnessSpread || 10;
+
+    var h, s, l;
+
+    var x, y;
+    for ( y = 0; y < height; y++ ) {
+      for ( x = 0; x < width; x++ ) {
+        h = randomIntSpread( hue, hueSpread );
+        s = randomIntSpread( saturation, saturationSpread );
+        l = randomIntSpread( lightness, lightnessSpread );
+
+        var hsl = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
+        drawPixel( ctx, x * pixelSize, y * pixelSize, 0, hsl );
+      }
+    }
   }
 
   function Radar( x, y, radius ) {
 
   }
+
 
   function Entity( x, y ) {
     this.x = x;
@@ -93,6 +118,11 @@
       ctx.drawImage( this.image, this.x, this.y );
     }
   };
+
+
+  function Enemy( x, y ) {
+    Entity.call( this, x, y );
+  }
 
   function Player( x, y ) {
     Entity.call( this, x, y );
@@ -154,7 +184,21 @@
       lastPressed: []
     };
 
-    this.entities.push( new Player( 256, 256 ) );
+    this.player = new Player( 256, 480 );
+    this.entities.push( this.player );
+    this.backgroundCanvas = document.createElement( 'canvas' );
+    this.backgroundCtx = this.backgroundCanvas.getContext( '2d' );
+    this.backgroundCanvas.width = this.canvas.width;
+    this.backgroundCanvas.height = this.canvas.height;
+
+    drawBackground( this.backgroundCtx, 32, 32, {
+      hue: 30,
+      saturation: 10,
+      lightness: 40,
+      hueSpread: 10,
+      saturationSpread: 5,
+      lightnessSpread: 5
+    });
   }
 
   Game.prototype.draw = function() {
@@ -167,6 +211,7 @@
     ctx.fillStyle = 'white';
     ctx.fillRect( 0, 0, width, height );
 
+    ctx.drawImage( this.backgroundCanvas, 0, 0 );
     drawKeys( ctx, this.input.keys, this.input.lastPressed );
 
     this.entities.forEach(function( entity ) {
@@ -199,7 +244,7 @@
 
 
   function onKeyDown( event ) {
-    console.log(event.which)
+    // console.log(event.which)
     game.input.keys[ event.which ] = true;
     game.input.lastPressed[ event.which ] = Date.now();
   }
