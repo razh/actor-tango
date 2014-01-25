@@ -37,13 +37,15 @@
         return;
       }
 
-      var dt = time - lastPressedTime;
-      if ( dt > maxTime ) {
-        lastPressed[ index ] = 0;
-        return;
-      }
+      if ( !key ) {
+        var dt = time - lastPressedTime;
+        if ( dt > maxTime ) {
+          lastPressed[ index ] = 0;
+          return;
+        }
 
-      ctx.globalAlpha = 1 - dt / maxTime;
+        ctx.globalAlpha = 1 - dt / maxTime;
+      }
 
 
       // Numeric.
