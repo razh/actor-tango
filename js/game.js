@@ -4,13 +4,20 @@
   var pixelSize = 16;
   var halfPixelSize = 0.5 * pixelSize;
 
-  function randomIntSpread( value, spread ) {
-    return Math.round( value + ( Math.random() < 0.5 ? spread : -spread ) );
+  function randomFloat( min, max ) {
+    return min + Math.random() * ( max - min );
+  }
+
+  function randomInt( min, max ) {
+    return Math.round( randomFloat( min, max ) );
+  }
+
+  function intSpread( value, spread ) {
+    return randomInt( value - spread, value + spread );
   }
 
   function drawPixel( ctx, x, y, size, color ) {
     size = size || pixelSize;
-    var halfSize = 0.5 * size;
 
     ctx.save();
 
@@ -92,9 +99,9 @@
     var x, y;
     for ( y = 0; y < height; y++ ) {
       for ( x = 0; x < width; x++ ) {
-        h = randomIntSpread( hue, hueSpread );
-        s = randomIntSpread( saturation, saturationSpread );
-        l = randomIntSpread( lightness, lightnessSpread );
+        h = intSpread( hue, hueSpread );
+        s = intSpread( saturation, saturationSpread );
+        l = intSpread( lightness, lightnessSpread );
 
         var hsl = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
         drawPixel( ctx, x * pixelSize, y * pixelSize, 0, hsl );
